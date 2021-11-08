@@ -29,14 +29,14 @@ var rotasUsuarios = []Rota{
 	},
 
 	{
-		Uri: "/usuarios/:id",
+		Uri: "/usuarios/{usuarioId}",
 		Method: http.MethodPut,
 		RequireAuth: false,
 		Action: controllers.AtualizarUsuario,
 	},
 
 	{
-		Uri: "/usuarios/:id",
+		Uri: "/usuarios/{usuarioId}",
 		Method: http.MethodDelete,
 		RequireAuth: false,
 		Action: controllers.DeletarUsuario,
