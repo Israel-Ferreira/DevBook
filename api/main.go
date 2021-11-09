@@ -16,7 +16,6 @@ func main() {
 
 	config.Carregar()
 
-
 	db, err := config.OpenConnection(config.ConexaoDbString)
 
 	if err != nil {
