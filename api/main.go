@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/Israel-Ferreira/api-devbook/src/config"
+	"github.com/Israel-Ferreira/api-devbook/src/repo"
 	"github.com/Israel-Ferreira/api-devbook/src/routers"
 )
 
@@ -14,13 +15,15 @@ func main() {
 
 	r := routers.GerarRouter()
 
-
 	config.Carregar()
+
+	repo.OpenConnection(config.ConexaoDbString)
+
+	defer repo.DB.Close()
 
 	routers.LoadHelloRoutes(r)
 
-	fmt.Println(config.ConexaoDbString)
-	fmt.Println(config.Porta)
+	fmt.Printf("Escutando na porta %d \n", config.Porta)
 
 	httpServer := &http.Server{
 		Handler: r,
