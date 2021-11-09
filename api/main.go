@@ -6,7 +6,6 @@ import (
 	"net/http"
 
 	"github.com/Israel-Ferreira/api-devbook/src/config"
-	"github.com/Israel-Ferreira/api-devbook/src/repo"
 	"github.com/Israel-Ferreira/api-devbook/src/routers"
 )
 
@@ -17,9 +16,14 @@ func main() {
 
 	config.Carregar()
 
-	repo.OpenConnection(config.ConexaoDbString)
 
-	defer repo.DB.Close()
+	db, err := config.OpenConnection(config.ConexaoDbString)
+
+	if err != nil {
+		log.Fatalln("Erro ao abrir a conexão com o banco de dados")
+	}
+
+	defer db.Close()
 
 	routers.LoadHelloRoutes(r)
 
