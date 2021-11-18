@@ -10,6 +10,7 @@ import (
 	"github.com/Israel-Ferreira/api-devbook/src/config"
 	"github.com/Israel-Ferreira/api-devbook/src/models"
 	"github.com/Israel-Ferreira/api-devbook/src/repo"
+	"github.com/Israel-Ferreira/api-devbook/src/respostas"
 )
 
 func openControllerConnection() (*sql.DB, error) {
@@ -40,22 +41,21 @@ func CriarUsuario(rw http.ResponseWriter, r *http.Request) {
 	corpoReq, err := ioutil.ReadAll(r.Body)
 
 	if err != nil {
-		rw.WriteHeader(http.StatusBadRequest)
+		respostas.Erro(rw, http.StatusBadRequest, err)
 		return
 	}
 
 	if err = json.Unmarshal(corpoReq, &usuario); err != nil {
-		rw.WriteHeader(http.StatusBadRequest)
+		respostas.Erro(rw, http.StatusBadRequest, err)
 		return
 	}
 
 	if err = repo.AddUsuario(usuario); err != nil {
-		rw.WriteHeader(http.StatusBadRequest)
+		respostas.Erro(rw, http.StatusBadRequest, err)
 		return
 	}
 
-	rw.Header().Add("Content-Type", "application/json")
-	rw.Write(corpoReq)
+	respostas.Json(rw, 201, corpoReq)
 }
 
 func BuscarUsuario(rw http.ResponseWriter, r *http.Request) {
@@ -67,7 +67,7 @@ func BuscarUsuarios(rw http.ResponseWriter, r *http.Request) {
 	db, err := openControllerConnection()
 
 	if err != nil {
-		rw.WriteHeader(http.StatusInternalServerError)
+		respostas.Erro(rw, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -78,16 +78,11 @@ func BuscarUsuarios(rw http.ResponseWriter, r *http.Request) {
 	usuarios, err := repo.GetUsuarios()
 
 	if err != nil {
-		rw.WriteHeader(http.StatusInternalServerError)
+		respostas.Erro(rw, http.StatusInternalServerError, err)
 		return
 	}
 
-	rw.Header().Set("Content-Type", "application/json")
-
-	if err = json.NewEncoder(rw).Encode(usuarios); err != nil {
-		rw.WriteHeader(http.StatusInternalServerError)
-		return
-	}
+	respostas.Json(rw, http.StatusOK, usuarios)
 }
 
 func AtualizarUsuario(rw http.ResponseWriter, r *http.Request) {
