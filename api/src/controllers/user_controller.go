@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strings"
 
 	"github.com/Israel-Ferreira/api-devbook/src/config"
 	"github.com/Israel-Ferreira/api-devbook/src/models"
@@ -50,12 +51,17 @@ func CriarUsuario(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if err = usuario.ValidateAndPrepare(); err != nil {
+		respostas.Erro(rw, http.StatusBadRequest, err)
+		return
+	}
+
 	if err = repo.AddUsuario(usuario); err != nil {
 		respostas.Erro(rw, http.StatusBadRequest, err)
 		return
 	}
 
-	respostas.Json(rw, 201, corpoReq)
+	respostas.Json(rw, 201, usuario)
 }
 
 func BuscarUsuario(rw http.ResponseWriter, r *http.Request) {
@@ -64,6 +70,8 @@ func BuscarUsuario(rw http.ResponseWriter, r *http.Request) {
 }
 
 func BuscarUsuarios(rw http.ResponseWriter, r *http.Request) {
+	nomeOuNick := strings.ToLower(r.URL.Query().Get("usuario"))
+
 	db, err := openControllerConnection()
 
 	if err != nil {
@@ -75,7 +83,7 @@ func BuscarUsuarios(rw http.ResponseWriter, r *http.Request) {
 
 	repo := repo.UserRepo{Db: db}
 
-	usuarios, err := repo.GetUsuarios()
+	usuarios, err := repo.BuscarUsuarios(nomeOuNick)
 
 	if err != nil {
 		respostas.Erro(rw, http.StatusInternalServerError, err)

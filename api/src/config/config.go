@@ -35,7 +35,7 @@ func Carregar() {
 
 
 	ConexaoDbString = fmt.Sprintf(
-		"%s:%s@tcp(%s)/%s",
+		"%s:%s@tcp(%s)/%s?parseTime=true",
 		dbUser,
 		dbPassword,
 		dbUrl,

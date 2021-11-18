@@ -2,12 +2,42 @@ package repo
 
 import (
 	"database/sql"
+	"fmt"
 
 	"github.com/Israel-Ferreira/api-devbook/src/models"
 )
 
 type UserRepo struct {
 	Db *sql.DB
+}
+
+func (u UserRepo) BuscarUsuarios(username string) ([]models.Usuario, error) {
+	nomeOrNick := fmt.Sprintf("%%%s%%", username)
+
+	query, err := u.Db.Query(
+		"select id, nome, email, nick, criadoEm from usuarios where nome LIKE ? or nick LIKE ?",
+		nomeOrNick,
+		nomeOrNick,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer query.Close()
+
+	var usuarios []models.Usuario
+
+	for query.Next() {
+		var usuario models.Usuario
+		if err = query.Scan(&usuario.ID, &usuario.Nome, &usuario.Email, &usuario.Nick, &usuario.CriadoEm); err != nil {
+			return nil, err
+		}
+
+		usuarios = append(usuarios, usuario)
+	}
+
+	return usuarios, nil
 }
 
 func (u UserRepo) GetUsuarios() ([]models.Usuario, error) {
