@@ -3,15 +3,18 @@ package controllers
 import (
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/Israel-Ferreira/api-devbook/src/config"
 	"github.com/Israel-Ferreira/api-devbook/src/models"
 	"github.com/Israel-Ferreira/api-devbook/src/repo"
 	"github.com/Israel-Ferreira/api-devbook/src/respostas"
+	"github.com/gorilla/mux"
 )
 
 func openControllerConnection() (*sql.DB, error) {
@@ -65,8 +68,39 @@ func CriarUsuario(rw http.ResponseWriter, r *http.Request) {
 }
 
 func BuscarUsuario(rw http.ResponseWriter, r *http.Request) {
-	fmt.Println("Buscando um usuário na base")
-	rw.Write([]byte("Buscando o usuario por id"))
+	params := mux.Vars(r)
+	usuarioID, err := strconv.ParseUint(params["usuarioId"], 10, 64)
+
+	if err != nil {
+		respostas.Erro(rw, http.StatusBadRequest, err)
+		return
+	}
+
+	db, err := openControllerConnection()
+
+	if err != nil {
+		respostas.Erro(rw, http.StatusInternalServerError, err)
+		return
+	}
+
+	defer db.Close()
+
+	dbRepo := repo.UserRepo{Db: db}
+
+	usuario, err := dbRepo.BuscarUsuarioPorId(int(usuarioID))
+
+	if err != nil {
+		respostas.Erro(rw, http.StatusInternalServerError, err)
+		return
+	}
+
+
+	if usuario.ID == 0 && err == nil {
+		respostas.Erro(rw, http.StatusNotFound, errors.New("usuario não encontrado"))
+		return
+	}
+
+	respostas.Json(rw, http.StatusOK, usuario)
 }
 
 func BuscarUsuarios(rw http.ResponseWriter, r *http.Request) {

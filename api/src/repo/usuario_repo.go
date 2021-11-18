@@ -11,6 +11,30 @@ type UserRepo struct {
 	Db *sql.DB
 }
 
+func (u UserRepo) BuscarUsuarioPorId(id int) (models.Usuario, error) {
+	query, err := u.Db.Query(
+		"select id, nome, email, nick, criadoEm from usuarios where id = ?",
+		id,
+	)
+
+	if err != nil {
+		return models.Usuario{}, err
+	}
+
+	defer query.Close()
+
+	var usuario models.Usuario
+
+	if query.Next() {
+		if err = query.Scan(&usuario.ID, &usuario.Nome, &usuario.Email, &usuario.Nick, &usuario.CriadoEm); err != nil {
+			return models.Usuario{}, err
+		}
+	}
+
+
+	return usuario, nil
+}
+
 func (u UserRepo) BuscarUsuarios(username string) ([]models.Usuario, error) {
 	nomeOrNick := fmt.Sprintf("%%%s%%", username)
 
