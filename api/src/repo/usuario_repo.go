@@ -11,6 +11,22 @@ type UserRepo struct {
 	Db *sql.DB
 }
 
+func (u UserRepo) AtualizarUsuario(id int, usuarioAt models.Usuario) error {
+	stmt, erro := u.Db.Prepare("update usuarios set nome = ?, nick = ?, email = ? where id = ?")
+
+	if erro != nil {
+		return erro
+	}
+
+	defer stmt.Close()
+
+	if _, erro = stmt.Exec(usuarioAt.Nome, usuarioAt.Nick, usuarioAt.Email, id); erro != nil {
+		return erro
+	}
+
+	return nil
+}
+
 func (u UserRepo) BuscarUsuarioPorId(id int) (models.Usuario, error) {
 	query, err := u.Db.Query(
 		"select id, nome, email, nick, criadoEm from usuarios where id = ?",
@@ -30,7 +46,6 @@ func (u UserRepo) BuscarUsuarioPorId(id int) (models.Usuario, error) {
 			return models.Usuario{}, err
 		}
 	}
-
 
 	return usuario, nil
 }
@@ -86,6 +101,23 @@ func (u UserRepo) GetUsuarios() ([]models.Usuario, error) {
 	}
 
 	return usuarios, nil
+}
+
+func (u UserRepo) DeletarUsuario(id int) error {
+	stmt, err := u.Db.Prepare("delete from usuarios where id = ?")
+
+	if err != nil {
+		return err
+	}
+
+	defer stmt.Close()
+
+	if _, err := stmt.Exec(id); err != nil {
+		return err
+	}
+
+	return nil
+
 }
 
 func (u UserRepo) AddUsuario(user models.Usuario) error {

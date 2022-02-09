@@ -4,13 +4,13 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strconv"
 	"strings"
 
 	"github.com/Israel-Ferreira/api-devbook/src/config"
+	"github.com/Israel-Ferreira/api-devbook/src/controllers/utils"
 	"github.com/Israel-Ferreira/api-devbook/src/models"
 	"github.com/Israel-Ferreira/api-devbook/src/repo"
 	"github.com/Israel-Ferreira/api-devbook/src/respostas"
@@ -54,7 +54,7 @@ func CriarUsuario(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err = usuario.ValidateAndPrepare(); err != nil {
+	if err = usuario.ValidateAndPrepare(http.MethodPost); err != nil {
 		respostas.Erro(rw, http.StatusBadRequest, err)
 		return
 	}
@@ -94,7 +94,6 @@ func BuscarUsuario(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-
 	if usuario.ID == 0 && err == nil {
 		respostas.Erro(rw, http.StatusNotFound, errors.New("usuario não encontrado"))
 		return
@@ -128,11 +127,76 @@ func BuscarUsuarios(rw http.ResponseWriter, r *http.Request) {
 }
 
 func AtualizarUsuario(rw http.ResponseWriter, r *http.Request) {
-	fmt.Println("Atualizar usuario por id")
-	rw.Write([]byte("Atualizar usuario por id "))
+	params := mux.Vars(r)
+
+	usuarioId, err := strconv.ParseInt(params["usuarioId"], 10, 64)
+
+	if err != nil {
+		respostas.Erro(rw, http.StatusBadRequest, err)
+		return
+	}
+
+	corpoReq, err := ioutil.ReadAll(r.Body)
+
+	if err != nil {
+		respostas.Erro(rw, http.StatusInternalServerError, err)
+		return
+	}
+
+	var usuario models.Usuario
+
+	if err = json.Unmarshal(corpoReq, &usuario); err != nil {
+		respostas.Erro(rw, http.StatusBadRequest, err)
+		return
+	}
+
+	if err = usuario.ValidateAndPrepare(http.MethodPut); err != nil {
+		respostas.Erro(rw, http.StatusBadRequest, err)
+		return
+	}
+
+	db, err := openControllerConnection()
+
+	if err != nil {
+		respostas.Erro(rw, http.StatusInternalServerError, err)
+		return
+	}
+
+	defer db.Close()
+
+	repo := repo.UserRepo{Db: db}
+
+	if err = repo.AtualizarUsuario(int(usuarioId), usuario); err != nil {
+		respostas.Erro(rw, http.StatusInternalServerError, err)
+		return
+	}
+
+	respostas.Json(rw, http.StatusNoContent, nil)
 }
 
 func DeletarUsuario(rw http.ResponseWriter, r *http.Request) {
-	fmt.Println("Deletar usuario por id")
-	rw.Write([]byte("Deletar Usuario"))
+	usuarioId, err := utils.GetPathIntVar(r, "usuarioId")
+
+	if err != nil {
+		respostas.Erro(rw, http.StatusBadRequest, err)
+		return
+	}
+
+	db, err := openControllerConnection()
+
+	if err != nil {
+		respostas.Erro(rw, http.StatusInternalServerError, err)
+		return
+	}
+
+	defer db.Close()
+
+	repo := repo.UserRepo{Db: db}
+
+	if err = repo.DeletarUsuario(usuarioId); err != nil {
+		respostas.Erro(rw, http.StatusInternalServerError, err)
+		return
+	}
+
+	respostas.Json(rw, http.StatusNoContent, nil)
 }
