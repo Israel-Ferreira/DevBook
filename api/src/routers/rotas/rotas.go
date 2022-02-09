@@ -25,10 +25,13 @@ func NewRouteWithoutAuth(uri string, method string, action func(rw http.Response
 func Configuration(r *mux.Router) *mux.Router {
 	rotas := rotasUsuarios
 
+	rotas = append(rotas, LoginRota())
+
 	for _, userRoute := range rotas {
 		r.HandleFunc(userRoute.Uri, userRoute.Action).Methods(userRoute.Method)
 	}
 
+	
 
 	return r
 }

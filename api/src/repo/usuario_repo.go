@@ -11,6 +11,29 @@ type UserRepo struct {
 	Db *sql.DB
 }
 
+func (u UserRepo) FindByEmail(email string) (models.Usuario, error) {
+	query, err := u.Db.Query(
+		"select id, senha from usuarios where email = ?",
+		email,
+	)
+
+	if err != nil {
+		return models.Usuario{}, err
+	}
+
+	defer query.Close()
+
+	var usuario models.Usuario
+
+	if query.Next() {
+		if err = query.Scan(&usuario.ID, &usuario.Senha); err != nil {
+			return models.Usuario{}, err
+		}
+	}
+
+	return usuario, nil
+}
+
 func (u UserRepo) AtualizarUsuario(id int, usuarioAt models.Usuario) error {
 	stmt, erro := u.Db.Prepare("update usuarios set nome = ?, nick = ?, email = ? where id = ?")
 
