@@ -3,10 +3,10 @@ package controllers
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 
+	"github.com/Israel-Ferreira/api-devbook/src/auth"
 	"github.com/Israel-Ferreira/api-devbook/src/dto"
 	"github.com/Israel-Ferreira/api-devbook/src/repo"
 	"github.com/Israel-Ferreira/api-devbook/src/respostas"
@@ -30,8 +30,6 @@ func LoginUser(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Println(usuario)
-
 	db, err := openControllerConnection()
 
 	if err != nil {
@@ -45,8 +43,6 @@ func LoginUser(rw http.ResponseWriter, r *http.Request) {
 
 	user, err := repo.FindByEmail(usuario.Email)
 
-	fmt.Println(err)
-
 	if err != nil {
 		respostas.Erro(rw, http.StatusUnauthorized, err)
 		return
@@ -57,13 +53,13 @@ func LoginUser(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Println(user)
-
 	if err = security.VerificarSenha(user.Senha, usuario.Password); err != nil {
 		respostas.Erro(rw, http.StatusUnauthorized, err)
 		return
 	}
 
-	respostas.Json(rw, http.StatusCreated, nil)
+	token, _ := auth.CriarToken(uint64(user.ID))
+
+	respostas.Json(rw, http.StatusCreated, token)
 
 }

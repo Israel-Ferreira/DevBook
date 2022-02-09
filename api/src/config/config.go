@@ -12,13 +12,15 @@ import (
 var (
 	ConexaoDbString string = ""
 	Porta           int    = 8090
+
+	SecretKey []byte
 )
 
 func Carregar() {
 	var erro error
 
 	if erro = godotenv.Load(); erro != nil {
-		log.Fatalln("erro ao carregar o arquivo .env")
+		log.Println("erro ao carregar o arquivo .env")
 	}
 
 	Porta, erro = strconv.Atoi(os.Getenv("API_PORT"))
@@ -27,12 +29,12 @@ func Carregar() {
 		Porta = 9000
 	}
 
-
 	dbName := os.Getenv("DB_NAME")
 	dbUser := os.Getenv("DB_USER")
 	dbPassword := os.Getenv("DB_PASSWORD")
 	dbUrl := os.Getenv("DB_URL")
 
+	secretKey := os.Getenv("SECRET_KEY")
 
 	ConexaoDbString = fmt.Sprintf(
 		"%s:%s@tcp(%s)/%s?parseTime=true",
@@ -42,6 +44,6 @@ func Carregar() {
 		dbName,
 	)
 
-
+	SecretKey = []byte(secretKey)
 
 }
