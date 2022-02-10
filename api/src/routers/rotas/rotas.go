@@ -3,6 +3,7 @@ package rotas
 import (
 	"net/http"
 
+	"github.com/Israel-Ferreira/api-devbook/src/middlewares"
 	"github.com/gorilla/mux"
 )
 
@@ -28,10 +29,14 @@ func Configuration(r *mux.Router) *mux.Router {
 	rotas = append(rotas, LoginRota())
 
 	for _, userRoute := range rotas {
-		r.HandleFunc(userRoute.Uri, userRoute.Action).Methods(userRoute.Method)
-	}
 
-	
+		if userRoute.RequireAuth {
+			r.HandleFunc(userRoute.Uri, middlewares.Logger(middlewares.Autenticar(userRoute.Action))).Methods(userRoute.Method)
+		} else {
+			r.HandleFunc(userRoute.Uri, userRoute.Action).Methods(userRoute.Method)
+		}
+
+	}
 
 	return r
 }

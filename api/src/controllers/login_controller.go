@@ -58,7 +58,12 @@ func LoginUser(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, _ := auth.CriarToken(uint64(user.ID))
+	token, err := auth.CriarToken(uint64(user.ID))
+
+	if err != nil {
+		respostas.Erro(rw, http.StatusInternalServerError, err)
+		return
+	}
 
 	respostas.Json(rw, http.StatusCreated, token)
 

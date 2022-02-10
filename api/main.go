@@ -7,6 +7,7 @@ import (
 
 	"github.com/Israel-Ferreira/api-devbook/src/config"
 	"github.com/Israel-Ferreira/api-devbook/src/routers"
+	"github.com/urfave/negroni/v2"
 )
 
 func main() {
@@ -26,10 +27,16 @@ func main() {
 
 	routers.LoadHelloRoutes(r)
 
+	n := negroni.New(
+		negroni.NewLogger(),
+	)
+
+	n.UseHandler(r)
+
 	fmt.Printf("Escutando na porta %d \n", config.Porta)
 
 	httpServer := &http.Server{
-		Handler: r,
+		Handler: n,
 		Addr:    fmt.Sprintf(":%d", config.Porta),
 	}
 
