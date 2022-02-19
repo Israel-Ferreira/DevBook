@@ -1,0 +1,32 @@
+version: '3.7'
+
+services:
+  mysql:
+    container_name: devbook-api-db
+    image: mysql:latest
+    environment:
+      - MYSQL_ROOT_PASSWORD=root123
+      - MYSQL_USER=admin
+      - MYSQL_PASSWORD=admin123
+
+    restart: always
+
+    networks:
+      - devbook-net
+
+    ports:
+      - 35060:3306
+
+    
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8280:8080
+
+    networks:
+      - devbook-net
+
+
+networks:
+  devbook-net:

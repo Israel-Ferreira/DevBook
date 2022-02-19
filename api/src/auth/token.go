@@ -1,6 +1,8 @@
 package auth
 
 import (
+	"crypto/rand"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"net/http"
@@ -62,4 +64,16 @@ func retornarChaveDeVerificacao(token *jwt.Token) (interface{}, error) {
 	}
 
 	return config.SecretKey, nil
+}
+
+func GenerateSecretKey() (string, error) {
+	chave := make([]byte, 64)
+
+	if _, err := rand.Read(chave); err != nil {
+		return "", err
+	}
+
+	stringBase64 := base64.StdEncoding.EncodeToString(chave)
+
+	return stringBase64, nil
 }
