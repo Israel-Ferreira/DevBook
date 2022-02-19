@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/Israel-Ferreira/api-devbook/src/auth"
 	"github.com/Israel-Ferreira/api-devbook/src/config"
 	"github.com/Israel-Ferreira/api-devbook/src/controllers/utils"
 	"github.com/Israel-Ferreira/api-devbook/src/models"
@@ -133,6 +134,18 @@ func AtualizarUsuario(rw http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		respostas.Erro(rw, http.StatusBadRequest, err)
+		return
+	}
+
+	tokenUserId, err := auth.ExtrairUsuarioId(r)
+
+	if err != nil {
+		respostas.Erro(rw, http.StatusUnauthorized, err)
+		return
+	}
+
+	if tokenUserId != uint64(usuarioId) {
+		respostas.Erro(rw, http.StatusForbidden, errors.New("acesso não autorizado: não é permitido atualizar ou deletar nenhuma conta que não seja sua"))
 		return
 	}
 

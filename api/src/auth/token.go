@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -25,21 +26,29 @@ func CriarToken(usuarioId uint64) (string, error) {
 	return token.SignedString(config.SecretKey)
 }
 
-func ValidarToken(r *http.Request) error {
-
+func parseToken(r *http.Request) (*jwt.Token, error) {
 	tokenString := extrairToken(r)
 
 	if tokenString == "" {
-		return errors.New("empty token")
+		return nil, errors.New("empty token")
 	}
 
 	token, err := jwt.Parse(tokenString, retornarChaveDeVerificacao)
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	fmt.Println(token)
+	return token, nil
+}
+
+func ValidarToken(r *http.Request) error {
+
+	token, err := parseToken(r)
+
+	if err != nil {
+		return err
+	}
 
 	if _, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 		return nil
@@ -64,6 +73,29 @@ func retornarChaveDeVerificacao(token *jwt.Token) (interface{}, error) {
 	}
 
 	return config.SecretKey, nil
+}
+
+func ExtrairUsuarioId(r *http.Request) (uint64, error) {
+	token, err := parseToken(r)
+
+	if err != nil {
+		return 0, err
+	}
+
+	if permitions, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		fmt.Println(permitions["usuarioId"])
+		usuarioIdPermitions := fmt.Sprintf("%.0f", permitions["usuarioId"])
+
+		usuarioID, err := strconv.ParseUint(usuarioIdPermitions, 10, 64)
+
+		if err != nil {
+			return 0, err
+		}
+
+		return usuarioID, nil
+	}
+
+	return 0, errors.New("cannot extract token")
 }
 
 func GenerateSecretKey() (string, error) {
