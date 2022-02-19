@@ -195,6 +195,18 @@ func DeletarUsuario(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	userId, err := auth.ExtrairUsuarioId(r)
+
+	if err != nil {
+		respostas.Erro(rw, http.StatusUnauthorized, err)
+		return
+	}
+
+	if userId != uint64(usuarioId) {
+		respostas.Erro(rw, http.StatusForbidden, errors.New("acesso não autorizado: não é permitido atualizar ou deletar nenhuma conta que não seja sua"))
+		return
+	}
+
 	db, err := openControllerConnection()
 
 	if err != nil {
