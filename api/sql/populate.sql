@@ -22,5 +22,5 @@ values
 insert into seguidores (usuario_id, seguidor_id)
 values 
 (1, 3),
-(1, 4)
+(1, 4),
 (1, 5);

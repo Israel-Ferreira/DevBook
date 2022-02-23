@@ -225,3 +225,4 @@ func DeletarUsuario(rw http.ResponseWriter, r *http.Request) {
 
 	respostas.Json(rw, http.StatusNoContent, nil)
 }
+

@@ -170,3 +170,25 @@ func (u UserRepo) AddUsuario(user models.Usuario) error {
 
 	return nil
 }
+
+func (u UserRepo) SeguirUsuario(usuarioID, seguidorID int) error {
+	stmt, err := u.Db.Prepare(
+		"insert ignore into seguidores(usuario_id, seguidor_id) values (?, ?)",
+	)
+
+	if err != nil {
+		return err
+	}
+
+	defer stmt.Close()
+
+	if _, err := stmt.Exec(usuarioID, seguidorID); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func NewUserRepo(db *sql.DB) UserRepo {
+	return UserRepo{Db: db}
+}

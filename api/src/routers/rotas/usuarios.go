@@ -8,38 +8,44 @@ import (
 
 var rotasUsuarios = []Rota{
 	{
-		Uri: "/usuarios", 
-		Method: http.MethodGet, 
+		Uri:         "/usuarios",
+		Method:      http.MethodGet,
 		RequireAuth: true,
-		Action: controllers.BuscarUsuarios,
+		Action:      controllers.BuscarUsuarios,
 	},
 
 	{
-		Uri: "/usuarios",
-		Method: http.MethodPost,
+		Uri:         "/usuarios",
+		Method:      http.MethodPost,
 		RequireAuth: false,
-		Action: controllers.CriarUsuario,
+		Action:      controllers.CriarUsuario,
 	},
 
 	{
-		Uri: "/usuarios/{usuarioId}",
-		Method: http.MethodGet,
+		Uri:         "/usuarios/{usuarioId}",
+		Method:      http.MethodGet,
 		RequireAuth: true,
-		Action: controllers.BuscarUsuario,
+		Action:      controllers.BuscarUsuario,
 	},
 
 	{
-		Uri: "/usuarios/{usuarioId}",
-		Method: http.MethodPut,
+		Uri:         "/usuarios/{usuarioId}",
+		Method:      http.MethodPut,
 		RequireAuth: true,
-		Action: controllers.AtualizarUsuario,
+		Action:      controllers.AtualizarUsuario,
 	},
 
 	{
-		Uri: "/usuarios/{usuarioId}",
-		Method: http.MethodDelete,
+		Uri:         "/usuarios/{usuarioId}",
+		Method:      http.MethodDelete,
 		RequireAuth: true,
-		Action: controllers.DeletarUsuario,
+		Action:      controllers.DeletarUsuario,
 	},
 
+	{
+		Uri:         "/usuarios/{usuarioId}/seguir",
+		Method:      http.MethodPost,
+		RequireAuth: true,
+		Action:      controllers.SeguirUsuario,
+	},
 }
