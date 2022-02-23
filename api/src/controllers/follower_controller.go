@@ -10,6 +10,36 @@ import (
 	"github.com/Israel-Ferreira/api-devbook/src/respostas"
 )
 
+func BuscarSeguidores(rw http.ResponseWriter, r *http.Request) {
+	usuarioID, err := utils.GetPathIntVar(r, "usuarioId")
+
+	if err != nil {
+		respostas.Erro(rw, http.StatusBadRequest, err)
+		return
+	}
+
+	db, err := openControllerConnection()
+
+	if err != nil {
+		respostas.Erro(rw, http.StatusInternalServerError, err)
+		return
+	}
+
+	defer db.Close()
+
+	repo := repo.NewUserRepo(db)
+
+	followers, err := repo.BuscarSeguidoresDoUsuario(usuarioID)
+
+	if err != nil {
+		respostas.Erro(rw, http.StatusInternalServerError, err)
+		return
+	}
+
+	respostas.Json(rw, http.StatusOK, followers)
+
+}
+
 func UnfollowUsuario(rw http.ResponseWriter, r *http.Request) {
 	seguidorID, err := auth.ExtrairUsuarioId(r)
 

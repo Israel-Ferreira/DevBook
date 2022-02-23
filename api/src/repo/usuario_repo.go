@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 
+	"github.com/Israel-Ferreira/api-devbook/src/dto"
 	"github.com/Israel-Ferreira/api-devbook/src/models"
 )
 
@@ -203,6 +204,60 @@ func (u UserRepo) SeguirUsuario(usuarioID, seguidorID int) error {
 	}
 
 	return nil
+}
+
+func (u *UserRepo) getUsersByFollowerIds(followerIds []uint) ([]*dto.FollowerDTO, error) {
+	query, err := u.Db.Query("select nome, nick, email from usuarios where id IN (?)", followerIds)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer query.Close()
+
+	var followers []*dto.FollowerDTO
+
+	for query.Next() {
+		var follower dto.FollowerDTO
+
+		if err = query.Scan(&follower.Username, &follower.Nick, &follower.Email); err != nil {
+			return nil, err
+		}
+
+		followers = append(followers, &follower)
+	}
+
+	return followers, nil
+
+}
+
+func (u *UserRepo) BuscarSeguidoresDoUsuario(usuarioID int) ([]*dto.FollowerDTO, error) {
+	followers := []*dto.FollowerDTO{}
+
+	query, err := u.Db.Query(`
+		select u.id, u.nome, u.nick, u.email from usuarios u
+		inner join seguidores s on s.seguidor_id = u.id
+		where s.usuario_id = ?`,
+		usuarioID,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer query.Close()
+
+	for query.Next() {
+		var follower dto.FollowerDTO
+
+		if err = query.Scan(&follower.ID, &follower.Username, &follower.Nick, &follower.Email); err != nil {
+			return nil, err
+		}
+
+		followers = append(followers, &follower)
+	}
+
+	return followers, nil
 }
 
 func NewUserRepo(db *sql.DB) UserRepo {
