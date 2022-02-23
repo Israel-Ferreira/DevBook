@@ -48,4 +48,11 @@ var rotasUsuarios = []Rota{
 		RequireAuth: true,
 		Action:      controllers.SeguirUsuario,
 	},
+
+	{
+		Uri:         "/usuarios/{usuarioId}/unfollow",
+		Method:      http.MethodDelete,
+		RequireAuth: true,
+		Action:      controllers.UnfollowUsuario,
+	},
 }

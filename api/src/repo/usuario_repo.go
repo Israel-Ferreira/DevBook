@@ -171,6 +171,22 @@ func (u UserRepo) AddUsuario(user models.Usuario) error {
 	return nil
 }
 
+func (u UserRepo) PararDeSeguir(usuarioID, seguidorID int) error {
+	stmt, err := u.Db.Prepare(
+		"delete from seguidores where usuario_id = ? and seguidor_id = ?",
+	)
+
+	if err != nil {
+		return err
+	}
+
+	if _, err := stmt.Exec(usuarioID, seguidorID); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (u UserRepo) SeguirUsuario(usuarioID, seguidorID int) error {
 	stmt, err := u.Db.Prepare(
 		"insert ignore into seguidores(usuario_id, seguidor_id) values (?, ?)",
