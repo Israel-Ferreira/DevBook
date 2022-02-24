@@ -235,6 +235,34 @@ func (u *UserRepo) BuscarSeguidoresDoUsuario(usuarioID int) ([]*dto.FollowerDTO,
 	return followers, nil
 }
 
+func (u UserRepo) BuscarSeguindo(usuarioID uint) ([]*dto.FollowingUserDTO, error) {
+	query, err := u.Db.Query(`
+		select u.id, u.nome, u.nick, u.email from usuarios u
+		inner join seguidores s on u.id = s.usuario_id
+		where s.seguidor_id = ?`,
+		usuarioID,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer query.Close()
+
+	var usuarios []*dto.FollowingUserDTO
+
+	for query.Next() {
+		var usuario dto.FollowingUserDTO
+		if err := query.Scan(&usuario.ID, &usuario.Username, &usuario.Nick, &usuario.Email); err != nil {
+			return nil, err
+		}
+
+		usuarios = append(usuarios, &usuario)
+	}
+
+	return usuarios, nil
+}
+
 func NewUserRepo(db *sql.DB) UserRepo {
 	return UserRepo{Db: db}
 }
