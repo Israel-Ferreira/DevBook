@@ -263,6 +263,42 @@ func (u UserRepo) BuscarSeguindo(usuarioID uint) ([]*dto.FollowingUserDTO, error
 	return usuarios, nil
 }
 
+func (u UserRepo) BuscarSenha(usuarioID uint) (string, error) {
+	query, err := u.Db.Query("select senha from usuarios where id = ?", usuarioID)
+
+	if err != nil {
+		return "", err
+	}
+
+	defer query.Close()
+
+	var usuario models.Usuario
+
+	if query.Next() {
+		if err := query.Scan(&usuario.Senha); err != nil {
+			return "", err
+		}
+	}
+
+	return usuario.Senha, nil
+}
+
+func (u UserRepo) AtualizarSenha(usuarioID uint, hashPassword string) error {
+	statement, err := u.Db.Prepare("update usuarios set senha = ? where id = ?")
+
+	if err != nil {
+		return err
+	}
+
+	defer statement.Close()
+
+	if _, err := statement.Exec(hashPassword, usuarioID); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func NewUserRepo(db *sql.DB) UserRepo {
 	return UserRepo{Db: db}
 }

@@ -69,4 +69,11 @@ var rotasUsuarios = []Rota{
 		RequireAuth: true,
 		Action:      controllers.BuscarSeguindo,
 	},
+
+	{
+		Uri:         "/usuarios/{usuarioId}/change-password",
+		Method:      http.MethodPost,
+		Action:      controllers.ChangeUserPassword,
+		RequireAuth: true,
+	},
 }
