@@ -1,7 +1,12 @@
 CREATE DATABASE IF NOT EXISTS DevBook;
 
-DROP TABLE IF EXISTS usuarios;
+
+DROP TABLE IF EXISTS publicacoes;
+
 DROP TABLE IF EXISTS seguidores;
+
+DROP TABLE IF EXISTS usuarios;
+
 
 CREATE TABLE usuarios (
     id INT AUTO_INCREMENT PRIMARY KEY, 
@@ -24,4 +29,16 @@ CREATE TABLE seguidores (
     ON DELETE CASCADE,
 
     PRIMARY KEY(usuario_id, seguidor_id)
+);
+
+CREATE TABLE publicacoes (
+    id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    titulo VARCHAR(50) NOT NULL,
+    conteudo VARCHAR(300) NOT NULL,
+    autor_id int not null,
+    FOREIGN KEY (autor_id) REFERENCES usuarios(id)
+    ON DELETE CASCADE,
+
+    curtidas INT NOT NULL DEFAULT 0,
+    criadaEm TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
