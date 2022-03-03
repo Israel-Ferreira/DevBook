@@ -28,6 +28,8 @@ func Configuration(r *mux.Router) *mux.Router {
 
 	rotas = append(rotas, LoginRota())
 
+	rotas = append(rotas, PublishRoutes...)
+
 	for _, userRoute := range rotas {
 
 		if userRoute.RequireAuth {
