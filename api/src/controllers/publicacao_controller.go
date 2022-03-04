@@ -53,10 +53,15 @@ func CriarPublicacao(rw http.ResponseWriter, r *http.Request) {
 		Conteudo: publicacaoDTO.Content,
 	}
 
+	if err := publicacao.Preparar(); err != nil {
+		respostas.Erro(rw, http.StatusBadRequest, err)
+		return
+	}
+
 	publicacao.ID, err = repo.CriarPublicacao(publicacao)
 
 	if err != nil {
-		respostas.Erro(rw, http.StatusBadRequest, err)
+		respostas.Erro(rw, http.StatusInternalServerError, err)
 		return
 	}
 
