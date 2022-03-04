@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/Israel-Ferreira/api-devbook/src/auth"
+	"github.com/Israel-Ferreira/api-devbook/src/controllers/utils"
 	"github.com/Israel-Ferreira/api-devbook/src/dto"
 	"github.com/Israel-Ferreira/api-devbook/src/models"
 	"github.com/Israel-Ferreira/api-devbook/src/repo"
@@ -17,7 +18,34 @@ func BuscarPublicacoes(rw http.ResponseWriter, r *http.Request) {}
 
 func DeletarPublicacao(rw http.ResponseWriter, r *http.Request) {}
 
-func BuscarPublicacao(rw http.ResponseWriter, r *http.Request) {}
+func BuscarPublicacao(rw http.ResponseWriter, r *http.Request) {
+	publicacaoId, err := utils.GetPathIntVar(r, "publicacaoId")
+
+	if err != nil {
+		respostas.Erro(rw, http.StatusBadRequest, err)
+		return
+	}
+
+	db, err := openControllerConnection()
+
+	if err != nil {
+		respostas.Erro(rw, http.StatusInternalServerError, err)
+		return
+	}
+
+	defer db.Close()
+
+	repo := repo.NovoRepositorioPublicacoes(db)
+
+	publicacao, err := repo.BuscarPublicacao(uint(publicacaoId))
+
+	if err != nil {
+		respostas.Erro(rw, http.StatusNotFound, err)
+		return
+	}
+
+	respostas.Json(rw, http.StatusOK, publicacao)
+}
 
 func CriarPublicacao(rw http.ResponseWriter, r *http.Request) {
 	usuarioId, err := auth.ExtrairUsuarioId(r)
