@@ -36,6 +36,37 @@ func (pbr PublicacaoRepo) BuscarPublicacao(id uint) (models.Publicacao, error) {
 	return publicacao, nil
 }
 
+func (pbr PublicacaoRepo) BuscarPublicacoes(usuarioID uint) ([]*models.Publicacao, error) {
+	query, err := pbr.db.Query(`
+		select distinct p.*, u.nick from publicacoes p 
+	 	join usuarios u on u.id = p.autor_id
+		inner join seguidores s on p.autor_id = s.usuario_id 
+		where p.autor_id = ? or s.seguidor_id = ?;`,
+		usuarioID,
+		usuarioID,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer query.Close()
+
+	var publicacoes []*models.Publicacao
+
+	for query.Next() {
+		var publicacao models.Publicacao
+
+		if err := query.Scan(&publicacao.ID, &publicacao.Titulo, &publicacao.Conteudo, &publicacao.AutorId, &publicacao.Curtidas, &publicacao.CriadoEm, &publicacao.AutorNick); err != nil {
+			return nil, err
+		}
+
+		publicacoes = append(publicacoes, &publicacao)
+	}
+
+	return publicacoes, nil
+}
+
 func (pbr PublicacaoRepo) CriarPublicacao(publicacao models.Publicacao) (uint64, error) {
 	stmt, err := pbr.db.Prepare("insert into publicacoes (titulo, conteudo, autor_id) values (?, ?, ?)")
 
