@@ -152,6 +152,22 @@ func (pbr PublicacaoRepo) CriarPublicacao(publicacao models.Publicacao) (uint64,
 	return uint64(lastInsertId), nil
 }
 
+func (pbr PublicacaoRepo) CurtirPublicacao(id uint) error {
+	stmt, err := pbr.db.Prepare("update publicacoes set curtidas = curtidas + 1 where id = ?")
+
+	if err != nil {
+		return err
+	}
+
+	defer stmt.Close()
+
+	if _, err := stmt.Exec(id); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func NovoRepositorioPublicacoes(db *sql.DB) *PublicacaoRepo {
 	return &PublicacaoRepo{db}
 }
