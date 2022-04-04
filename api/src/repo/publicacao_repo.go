@@ -3,11 +3,28 @@ package repo
 import (
 	"database/sql"
 
+	"github.com/Israel-Ferreira/api-devbook/src/dto"
 	"github.com/Israel-Ferreira/api-devbook/src/models"
 )
 
 type PublicacaoRepo struct {
 	db *sql.DB
+}
+
+func (pbr PublicacaoRepo) AtualizarPublicacao(id uint, publicacaoDTO dto.PublicacaoDTO) error {
+	stmt, err := pbr.db.Prepare("update publicacoes set titulo = ?, conteudo = ?  where id = ?")
+
+	if err != nil {
+		return err
+	}
+
+	defer stmt.Close()
+
+	if _, err = stmt.Exec(publicacaoDTO.Title, publicacaoDTO.Content, id); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (pbr PublicacaoRepo) BuscarPublicacao(id uint) (models.Publicacao, error) {

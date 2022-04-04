@@ -3,6 +3,7 @@ package controllers
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 
 	"github.com/Israel-Ferreira/api-devbook/src/auth"
 	"github.com/Israel-Ferreira/api-devbook/src/controllers/utils"
@@ -10,9 +11,70 @@ import (
 	"github.com/Israel-Ferreira/api-devbook/src/models"
 	"github.com/Israel-Ferreira/api-devbook/src/repo"
 	"github.com/Israel-Ferreira/api-devbook/src/respostas"
+	"github.com/gorilla/mux"
 )
 
-func AtualizarPublicacao(rw http.ResponseWriter, r *http.Request) {}
+func AtualizarPublicacao(rw http.ResponseWriter, r *http.Request) {
+	usuarioID, err := auth.ExtrairUsuarioId(r)
+
+	if err != nil {
+		respostas.Erro(rw, http.StatusUnauthorized, err)
+		return
+	}
+
+	parametros := mux.Vars(r)
+
+	publicacaoId, err := strconv.ParseInt(parametros["publicacaoId"], 10, 64)
+
+	if err != nil {
+		respostas.Erro(rw, http.StatusBadRequest, err)
+		return
+	}
+
+	db, err := openControllerConnection()
+
+	if err != nil {
+		respostas.Erro(rw, http.StatusInternalServerError, err)
+		return
+	}
+
+	defer db.Close()
+
+	pubRepo := repo.NovoRepositorioPublicacoes(db)
+
+	publicacao, err := pubRepo.BuscarPublicacao(uint(publicacaoId))
+
+	if err != nil {
+		respostas.Erro(rw, http.StatusNotFound, err)
+		return
+	}
+
+	if publicacao.AutorId != usuarioID {
+		respostas.Erro(rw, http.StatusForbidden, err)
+		return
+	}
+
+	var body dto.PublicacaoDTO
+
+	defer r.Body.Close()
+
+	if err = json.NewDecoder(r.Body).Decode(&body); err != nil {
+		respostas.Erro(rw, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err = body.Preparar(); err != nil {
+		respostas.Erro(rw, http.StatusBadRequest, err)
+		return
+	}
+
+	if err = pubRepo.AtualizarPublicacao(uint(publicacaoId), body); err != nil {
+		respostas.Erro(rw, http.StatusInternalServerError, err)
+		return
+	}
+
+	respostas.Json(rw, http.StatusNoContent, nil)
+}
 
 func BuscarPublicacoes(rw http.ResponseWriter, r *http.Request) {
 	usuarioID, err := auth.ExtrairUsuarioId(r)
