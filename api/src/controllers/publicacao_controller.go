@@ -77,6 +77,37 @@ func AtualizarPublicacao(rw http.ResponseWriter, r *http.Request) {
 	respostas.Json(rw, http.StatusNoContent, nil)
 }
 
+func BuscarPublicacoesDoUsuario(rw http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+
+	userId, err := strconv.Atoi(params["usuarioId"])
+
+	if err != nil {
+		respostas.Json(rw, http.StatusNotFound, err)
+		return
+	}
+
+	db, err := openControllerConnection()
+
+	if err != nil {
+		respostas.Erro(rw, http.StatusInternalServerError, err)
+		return
+	}
+
+	defer db.Close()
+
+	repo := repo.NovoRepositorioPublicacoes(db)
+
+	publicacoes, err := repo.BuscarPublicacoesDoUsuario(uint(userId))
+
+	if err != nil {
+		respostas.Erro(rw, http.StatusInternalServerError, err)
+		return
+	}
+
+	respostas.Json(rw, http.StatusOK, publicacoes)
+}
+
 func BuscarPublicacoes(rw http.ResponseWriter, r *http.Request) {
 	usuarioID, err := auth.ExtrairUsuarioId(r)
 

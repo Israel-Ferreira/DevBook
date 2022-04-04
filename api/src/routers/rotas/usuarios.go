@@ -71,6 +71,13 @@ var rotasUsuarios = []Rota{
 	},
 
 	{
+		Uri:         "/usuarios/{usuarioId}/publicacoes",
+		Method:      http.MethodGet,
+		Action:      controllers.BuscarPublicacoesDoUsuario,
+		RequireAuth: true,
+	},
+
+	{
 		Uri:         "/usuarios/{usuarioId}/change-password",
 		Method:      http.MethodPost,
 		Action:      controllers.ChangeUserPassword,

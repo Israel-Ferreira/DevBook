@@ -27,6 +27,34 @@ func (pbr PublicacaoRepo) AtualizarPublicacao(id uint, publicacaoDTO dto.Publica
 	return nil
 }
 
+func (pbr PublicacaoRepo) BuscarPublicacoesDoUsuario(userId uint) ([]models.Publicacao, error) {
+	query, err := pbr.db.Query(`
+		select p.*, u.nick from 
+		publicacoes p join usuarios u
+		on u.id = p.autor_id
+		where p.autor_id = ?`,
+		userId,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	publicacoes := []models.Publicacao{}
+
+	for query.Next() {
+		var publicacao models.Publicacao
+
+		if query.Scan(&publicacao.ID, &publicacao.Titulo, &publicacao.Conteudo, &publicacao.AutorId, &publicacao.Curtidas, &publicacao.CriadoEm, &publicacao.AutorNick); err != nil {
+			return nil, err
+		}
+
+		publicacoes = append(publicacoes, publicacao)
+	}
+
+	return publicacoes, nil
+}
+
 func (pbr PublicacaoRepo) DeletarPublicacao(id uint) error {
 	stmt, err := pbr.db.Prepare("delete from publicacoes where id = ?")
 
