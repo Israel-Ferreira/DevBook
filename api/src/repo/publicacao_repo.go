@@ -168,6 +168,28 @@ func (pbr PublicacaoRepo) CurtirPublicacao(id uint) error {
 	return nil
 }
 
+func (pbr PublicacaoRepo) DescurtirPublicacao(id uint) error {
+	stmt, err := pbr.db.Prepare(`
+		update publicacoes set curtidas = 
+		CASE 
+			WHEN curtidas > 0 THEN curtidas - 1
+			ELSE curtidas END
+		where id = ?
+	`)
+
+	if err != nil {
+		return err
+	}
+
+	defer stmt.Close()
+
+	if _, err := stmt.Exec(id); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func NovoRepositorioPublicacoes(db *sql.DB) *PublicacaoRepo {
 	return &PublicacaoRepo{db}
 }

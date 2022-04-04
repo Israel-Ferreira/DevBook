@@ -246,6 +246,36 @@ func CurtirPublicacao(rw http.ResponseWriter, r *http.Request) {
 	respostas.Json(rw, http.StatusNoContent, nil)
 }
 
+func DescurtirPublicacao(rw http.ResponseWriter, r *http.Request) {
+
+	params := mux.Vars(r)
+
+	publicacaoID, err := strconv.ParseUint(params["publicacaoId"], 10, 64)
+
+	if err != nil {
+		respostas.Json(rw, http.StatusBadRequest, err)
+		return
+	}
+
+	db, err := openControllerConnection()
+
+	if err != nil {
+		respostas.Erro(rw, http.StatusInternalServerError, err)
+		return
+	}
+
+	defer db.Close()
+
+	repo := repo.NovoRepositorioPublicacoes(db)
+
+	if err = repo.DescurtirPublicacao(uint(publicacaoID)); err != nil {
+		respostas.Erro(rw, http.StatusInternalServerError, err)
+		return
+	}
+
+	respostas.Json(rw, http.StatusNoContent, nil)
+}
+
 func CriarPublicacao(rw http.ResponseWriter, r *http.Request) {
 	usuarioId, err := auth.ExtrairUsuarioId(r)
 

@@ -48,4 +48,11 @@ var PublishRoutes = []Rota{
 		Action:      controllers.CurtirPublicacao,
 		RequireAuth: true,
 	},
+
+	{
+		Uri:         "/publicacoes/{publicacaoId}/dislike",
+		Method:      http.MethodPut,
+		Action:      controllers.DescurtirPublicacao,
+		RequireAuth: true,
+	},
 }
