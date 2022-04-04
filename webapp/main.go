@@ -6,10 +6,13 @@ import (
 	"net/http"
 
 	"github.com/Israel-Ferreira/webapp-devbook/src/routes"
+	"github.com/Israel-Ferreira/webapp-devbook/src/utils"
 )
 
 func main() {
 	fmt.Println("Rodando WebApp")
+
+	utils.LoadTemplates()
 
 	router := routes.GerarRotas()
 
