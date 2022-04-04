@@ -27,6 +27,22 @@ func (pbr PublicacaoRepo) AtualizarPublicacao(id uint, publicacaoDTO dto.Publica
 	return nil
 }
 
+func (pbr PublicacaoRepo) DeletarPublicacao(id uint) error {
+	stmt, err := pbr.db.Prepare("delete from publicacoes where id = ?")
+
+	if err != nil {
+		return err
+	}
+
+	defer stmt.Close()
+
+	if _, err := stmt.Exec(id); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (pbr PublicacaoRepo) BuscarPublicacao(id uint) (models.Publicacao, error) {
 	query, err := pbr.db.Query(`
 		select p.*, u.nick from publicacoes 

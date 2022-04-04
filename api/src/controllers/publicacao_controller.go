@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 	"strconv"
 
@@ -50,7 +51,7 @@ func AtualizarPublicacao(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	if publicacao.AutorId != usuarioID {
-		respostas.Erro(rw, http.StatusForbidden, err)
+		respostas.Erro(rw, http.StatusForbidden, errors.New("acesso não autorizado"))
 		return
 	}
 
@@ -106,7 +107,54 @@ func BuscarPublicacoes(rw http.ResponseWriter, r *http.Request) {
 
 }
 
-func DeletarPublicacao(rw http.ResponseWriter, r *http.Request) {}
+func DeletarPublicacao(rw http.ResponseWriter, r *http.Request) {
+	usuarioID, err := auth.ExtrairUsuarioId(r)
+
+	if err != nil {
+		respostas.Erro(rw, http.StatusUnauthorized, err)
+		return
+	}
+
+	parametros := mux.Vars(r)
+
+	publicacaoId, err := strconv.ParseInt(parametros["publicacaoId"], 10, 64)
+
+	if err != nil {
+		respostas.Erro(rw, http.StatusBadRequest, err)
+		return
+	}
+
+	db, err := openControllerConnection()
+
+	if err != nil {
+		respostas.Erro(rw, http.StatusInternalServerError, err)
+		return
+	}
+
+	defer db.Close()
+
+	pubRepo := repo.NovoRepositorioPublicacoes(db)
+
+	publicacao, err := pubRepo.BuscarPublicacao(uint(publicacaoId))
+
+	if err != nil {
+		respostas.Erro(rw, http.StatusNotFound, err)
+		return
+	}
+
+	if publicacao.AutorId != usuarioID {
+		respostas.Erro(rw, http.StatusForbidden, errors.New("acesso não autorizado"))
+		return
+	}
+
+	if err = pubRepo.DeletarPublicacao(uint(publicacao.ID)); err != nil {
+		respostas.Erro(rw, http.StatusInternalServerError, err)
+		return
+	}
+
+	respostas.Json(rw, http.StatusNoContent, nil)
+
+}
 
 func BuscarPublicacao(rw http.ResponseWriter, r *http.Request) {
 	publicacaoId, err := utils.GetPathIntVar(r, "publicacaoId")
