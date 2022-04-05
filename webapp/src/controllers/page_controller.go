@@ -9,3 +9,7 @@ import (
 func LoadLoginPage(rw http.ResponseWriter, r *http.Request) {
 	utils.RenderTemplate(rw, "login.html", nil)
 }
+
+func LoadCreateUserPage(rw http.ResponseWriter, r *http.Request) {
+	utils.RenderTemplate(rw, "cadastro.html", nil)
+}
