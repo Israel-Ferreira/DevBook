@@ -1,40 +1,25 @@
-const criarUsuario = async (e) => {
-    e.preventDefault()
-    console.log("Dentro da função js")
+$('#formulario-cadastro').on('submit', criarUsuario);
 
-    let nome = document.getElementById("name")
-    let email = document.getElementById("email")
-    let nick = document.getElementById("nick")
+function criarUsuario(evento) {
+    evento.preventDefault();
 
-    let senha = document.getElementById("password")
-    let confirmacaoSenha = document.getElementById("confirm-password")
+    if ($('#password').val() != $('#confirm-password').val()) {
 
-
-    if (senha.value !== confirmacaoSenha.value) {
-        alert("As senhas não coincidem")
-        return
+        return;
     }
 
-    const request =  await fetch("/usuarios", {
+    $.ajax({
+        url: "/usuarios",
         method: "POST",
-        body: {
-            nome: nome.value,
-            email: email.value,
-            nick: nick.value,
-            senha: senha.value
+        data: {
+            nome: $('#name').val(),
+            email: $('#email').val(),
+            nick: $('#nick').val(),
+            senha: $('#password').val()
         }
-    })
-
-
-    const resp =  await request
-
-    if(resp.status == 201){
-        console.log("Teste")
-    }else{
-        console.log("Erro ao submeter o formulario")
-    }
-
+    }).done(function () {
+        alert("Usuário Criado com sucesso")
+    }).fail(function () {
+        alert("Erro ao criar o usuário")
+    });
 }
-
-
-$("#formulario-cadastro").on("submit", criarUsuario)
