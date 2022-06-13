@@ -19,7 +19,8 @@ function criarUsuario(evento) {
         }
     }).done(function () {
         alert("Usuário Criado com sucesso")
-    }).fail(function () {
+    }).fail(function (err) {
+        console.log(err)
         alert("Erro ao criar o usuário")
     });
 }

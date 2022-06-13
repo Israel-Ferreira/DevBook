@@ -3,6 +3,7 @@ package controllers
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 
@@ -31,12 +32,19 @@ func CriarUsuario(rw http.ResponseWriter, r *http.Request) {
 	resp, err := http.Post(url, "application/json", bytes.NewBuffer(usuario))
 
 	if err != nil {
-		fmt.Println(err)
-		rw.WriteHeader(http.StatusInternalServerError)
+		responses.JSON(rw, http.StatusInternalServerError, responses.Erro{Erro: err.Error()})
 		return
 	}
 
 	defer resp.Body.Close()
 
-	responses.JSON(rw,resp.StatusCode, nil)
+	fmt.Println(resp.StatusCode)
+
+	if resp.StatusCode >= 400 {
+		errBadReq := errors.New("erro ao validar o usuario")
+		responses.JSON(rw, http.StatusUnprocessableEntity, responses.Erro{Erro: errBadReq.Error()})
+		return
+	}
+
+	responses.JSON(rw, resp.StatusCode, nil)
 }
