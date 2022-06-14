@@ -3,11 +3,10 @@ package controllers
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 
+	"github.com/Israel-Ferreira/webapp-devbook/src/models"
 	"github.com/Israel-Ferreira/webapp-devbook/src/responses"
 )
 
@@ -35,17 +34,19 @@ func LoginUser(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if response.StatusCode >= 400 {
+	defer response.Body.Close()
 
-		fmt.Println(response.StatusCode)
-		errBadReq := errors.New("erro ao validar o usuario")
-		responses.JSON(rw, http.StatusUnprocessableEntity, responses.Erro{Erro: errBadReq.Error()})
+	if response.StatusCode >= 400 {
+		responses.TratarErro(rw, response)
 		return
 	}
 
-	token, _ := ioutil.ReadAll(response.Body)
+	var userAuthData models.UserAuth
 
-	fmt.Println(string(token))
+	if err := json.NewDecoder(response.Body).Decode(&userAuthData); err != nil {
+		responses.JSON(rw, http.StatusUnprocessableEntity, responses.Erro{Erro: err.Error()})
+		return
+	}
 
-	responses.JSON(rw, response.StatusCode, response.Body)
+	responses.JSON(rw, response.StatusCode, userAuthData)
 }
