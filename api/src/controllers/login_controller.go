@@ -65,6 +65,8 @@ func LoginUser(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	respostas.Json(rw, http.StatusCreated, token)
+	tokenResp := dto.NewUserTokenDTO(user.ID, token)
+
+	respostas.Json(rw, http.StatusCreated, tokenResp)
 
 }
