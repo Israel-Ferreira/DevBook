@@ -38,3 +38,19 @@ func SalvarCookie(rw http.ResponseWriter, ID uint, token string) error {
 
 	return nil
 }
+
+func LerCookies(r *http.Request) (map[string]string, error) {
+	cookie, err := r.Cookie("dados")
+
+	if err != nil {
+		return nil, err
+	}
+
+	values := make(map[string]string)
+
+	if err := Cookie.Decode("dados", cookie.Value, &values); err != nil {
+		return nil, err
+	}
+
+	return values, nil
+}
