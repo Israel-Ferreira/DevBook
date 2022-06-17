@@ -25,7 +25,6 @@ func LoginUser(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Println(string(usuario))
 
 	url := fmt.Sprintf("%s/login", config.ApiUrl)
 
@@ -51,7 +50,7 @@ func LoginUser(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := cookies.SalvarCookie(rw, userAuthData.ID, userAuthData.Token); err != nil {
-		
+
 	}
 
 	responses.JSON(rw, response.StatusCode, userAuthData)
