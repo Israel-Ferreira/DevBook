@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/Israel-Ferreira/webapp-devbook/src/config"
 	"github.com/Israel-Ferreira/webapp-devbook/src/responses"
 )
 
@@ -27,7 +28,7 @@ func CriarUsuario(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	url := "http://localhost:8990/usuarios"
+	url := fmt.Sprintf("%s/usuarios", config.ApiUrl)
 
 	resp, err := http.Post(url, "application/json", bytes.NewBuffer(usuario))
 
